@@ -1,8 +1,16 @@
 # VoiceDeck
 
+![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)
+![Qt](https://img.shields.io/badge/Qt-PySide6-41cd52?logo=qt&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-Whisper-412991?logo=openai&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-e95420?logo=ubuntu&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 A desktop voice recorder with speech-to-text transcription for Ubuntu. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
 
-Built with Python, PySide6 (Qt 6), and sounddevice. Features a minimal dark-themed interface with keyboard shortcuts and clipboard integration.
+<p align="center">
+  <img src="assets/screenshot.png" alt="VoiceDeck Screenshot" width="600">
+</p>
 
 ## Features
 
@@ -13,15 +21,6 @@ Built with Python, PySide6 (Qt 6), and sounddevice. Features a minimal dark-them
 - **Keyboard shortcut**: Ctrl+Space toggles recording
 - **Clipboard integration**: One-click copy of transcripts
 - **Configurable backend**: Default OpenAI API, extensible for other providers
-
-## Tech Stack
-
-- **Language**: Python 3.10+
-- **GUI**: PySide6 (Qt 6)
-- **Audio**: sounddevice + scipy for WAV handling
-- **STT**: OpenAI Audio API (whisper-1 model)
-- **Config**: TOML files + environment variables
-- **Packaging**: PyInstaller + dpkg-deb
 
 ## Installation
 
