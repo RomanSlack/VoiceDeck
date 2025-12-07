@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=VoiceDeck
+Comment=Record voice and transcribe to text
+Exec=/opt/voicedeck/VoiceDeck
+Icon=voicedeck
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Recorder;Utility;
+Keywords=voice;record;transcribe;speech;text;stt;
+StartupNotify=true
+StartupWMClass=VoiceDeck

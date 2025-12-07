@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voicedeck"
+version = "1.0.0"
+description = "Desktop voice recorder with speech-to-text transcription"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "VoiceDeck Contributors"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+    "PySide6>=6.6.0",
+    "sounddevice>=0.4.6",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "openai>=1.0.0",
+    "toml>=0.10.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+voicedeck = "voicedeck.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["voicedeck*"]

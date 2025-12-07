@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d5a2d"/>
+      <stop offset="100%" style="stop-color:#1a3a1a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="120" fill="url(#bgGrad)"/>
+
+  <!-- Microphone body -->
+  <rect x="104" y="60" width="48" height="80" rx="24" fill="#e0e0e0"/>
+
+  <!-- Microphone grille lines -->
+  <line x1="112" y1="75" x2="144" y2="75" stroke="#1e1e1e" stroke-width="2" opacity="0.3"/>
+  <line x1="112" y1="85" x2="144" y2="85" stroke="#1e1e1e" stroke-width="2" opacity="0.3"/>
+  <line x1="112" y1="95" x2="144" y2="95" stroke="#1e1e1e" stroke-width="2" opacity="0.3"/>
+  <line x1="112" y1="105" x2="144" y2="105" stroke="#1e1e1e" stroke-width="2" opacity="0.3"/>
+  <line x1="112" y1="115" x2="144" y2="115" stroke="#1e1e1e" stroke-width="2" opacity="0.3"/>
+
+  <!-- Microphone stand arc -->
+  <path d="M 80 120 Q 80 165 128 165 Q 176 165 176 120"
+        fill="none" stroke="#e0e0e0" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Microphone stand -->
+  <line x1="128" y1="165" x2="128" y2="195" stroke="#e0e0e0" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Base -->
+  <line x1="100" y1="195" x2="156" y2="195" stroke="#e0e0e0" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Sound waves -->
+  <path d="M 185 90 Q 200 110 200 128 Q 200 146 185 166"
+        fill="none" stroke="#4ecdc4" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  <path d="M 200 75 Q 225 105 225 128 Q 225 151 200 181"
+        fill="none" stroke="#4ecdc4" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+</svg>

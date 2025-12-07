@@ -1,0 +1,35 @@
+# VoiceDeck Configuration Example
+# Copy this file to one of these locations:
+#   ~/.config/voicedeck/config.toml
+#   ~/.voicedeck.toml
+#   ./config.toml (in working directory)
+
+[stt]
+# Speech-to-text provider: "openai" (more can be added)
+provider = "openai"
+
+# Model to use for transcription
+# Options: "whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe"
+model = "whisper-1"
+
+# Optional: Override the API base URL (for Azure OpenAI or compatible endpoints)
+# base_url = "https://your-endpoint.openai.azure.com/v1"
+
+# API key can be set here or via OPENAI_API_KEY environment variable
+# Environment variable takes precedence. Never commit real keys to version control.
+# api_key = ""
+
+# Chunking settings for long recordings
+max_chunk_seconds = 600  # Split recordings longer than this (seconds)
+max_chunk_mb = 24        # Maximum chunk file size in MB
+
+[audio]
+# Audio recording settings
+sample_rate = 16000  # 16kHz is optimal for speech recognition
+channels = 1         # Mono recording
+
+# Optional: Custom directory for temporary audio files
+# temp_dir = "/tmp/voicedeck"
+
+# Whether to delete audio files after successful transcription
+cleanup_audio_after_transcription = true
