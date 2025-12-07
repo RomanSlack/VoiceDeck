@@ -1,5 +1,6 @@
 # VoiceDeck
 
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-cc785c?logo=anthropic&logoColor=white)](https://claude.ai/code)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)
 ![Qt](https://img.shields.io/badge/Qt-PySide6-41cd52?logo=qt&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Whisper-412991?logo=openai&logoColor=white)
@@ -9,7 +10,7 @@
 A desktop voice recorder with speech-to-text transcription for Ubuntu. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
 
 <p align="center">
-  <img src="assets/screenshot.png" alt="VoiceDeck Screenshot" width="600">
+  <img src="assets/Voice_Deck_Thumbnail.jpg" alt="VoiceDeck Screenshot" width="600">
 </p>
 
 ## Features
