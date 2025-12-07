@@ -242,13 +242,7 @@ QPushButton#copyButton, QPushButton#clearButton {
    ============================================ */
 
 QTextEdit {
-    background: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop:0 #141418,
-        stop:0.05 #18181c,
-        stop:0.95 #1c1c20,
-        stop:1 #202024
-    );
+    background-color: #18181c;
     border: 1px solid #2a2a32;
     border-top-color: #1a1a1e;
     border-radius: 5px;

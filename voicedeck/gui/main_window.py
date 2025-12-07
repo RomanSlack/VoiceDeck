@@ -83,8 +83,8 @@ class MainWindow(QMainWindow):
     def _setup_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle("VoiceDeck")
-        self.setMinimumSize(520, 540)
-        self.resize(560, 580)
+        self.setMinimumSize(600, 650)
+        self.resize(700, 725)
         self.setStyleSheet(DARK_STYLESHEET)
 
         # Central widget and layout
