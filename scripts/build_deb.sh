@@ -109,6 +109,9 @@ find "$DEB_ROOT/opt/voicedeck" -type f -exec chmod 644 {} \;
 chmod 755 "$DEB_ROOT/opt/voicedeck/VoiceDeck"
 # Make all .so files executable
 find "$DEB_ROOT/opt/voicedeck" -name "*.so*" -exec chmod 755 {} \;
+# Desktop file and icons must be world-readable
+chmod 644 "$DEB_ROOT/usr/share/applications/voicedeck.desktop"
+find "$DEB_ROOT/usr/share/icons" -type f -exec chmod 644 {} \;
 
 # Build the .deb package
 dpkg-deb --build --root-owner-group "$DEB_ROOT"

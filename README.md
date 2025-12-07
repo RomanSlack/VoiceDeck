@@ -10,7 +10,7 @@
 A desktop voice recorder with speech-to-text transcription for Ubuntu. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
 
 <p align="center">
-  <img src="assets/Voice_Deck_Thumbnail.jpg" alt="VoiceDeck Screenshot" width="600">
+  <img src="assets/voice_deck_thumbnail_2.jpg" alt="VoiceDeck Screenshot" width="600">
 </p>
 
 ## Features
