@@ -28,20 +28,33 @@ class AudioConfig:
 
 
 @dataclass
+class ShortcutsConfig:
+    """Keyboard shortcuts configuration."""
+    toggle_recording: str = "Ctrl+Space"
+    copy_transcript: str = "Ctrl+Shift+C"
+
+
+@dataclass
 class AppConfig:
     """Application configuration."""
     stt: STTConfig = field(default_factory=STTConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)
+    shortcuts: ShortcutsConfig = field(default_factory=ShortcutsConfig)
     cleanup_audio_after_transcription: bool = True
+
+    @classmethod
+    def get_config_path(cls) -> Path:
+        """Return the primary config file path."""
+        xdg_config = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))
+        return Path(xdg_config) / "voicedeck" / "config.toml"
 
     @classmethod
     def get_config_paths(cls) -> list[Path]:
         """Return list of config file paths to check, in priority order."""
         paths = []
 
-        # XDG config directory
-        xdg_config = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))
-        paths.append(Path(xdg_config) / "voicedeck" / "config.toml")
+        # XDG config directory (primary)
+        paths.append(cls.get_config_path())
 
         # Home directory
         paths.append(Path.home() / ".voicedeck.toml")
@@ -108,12 +121,51 @@ class AppConfig:
             config.audio.channels = audio_data.get("channels", config.audio.channels)
             config.audio.temp_dir = audio_data.get("temp_dir", config.audio.temp_dir)
 
+        if "shortcuts" in data:
+            shortcuts_data = data["shortcuts"]
+            config.shortcuts.toggle_recording = shortcuts_data.get(
+                "toggle_recording", config.shortcuts.toggle_recording
+            )
+            config.shortcuts.copy_transcript = shortcuts_data.get(
+                "copy_transcript", config.shortcuts.copy_transcript
+            )
+
         config.cleanup_audio_after_transcription = data.get(
             "cleanup_audio_after_transcription",
             config.cleanup_audio_after_transcription
         )
 
         return config
+
+    def to_dict(self) -> dict:
+        """Convert config to dictionary for saving."""
+        data = {
+            "stt": {
+                "provider": self.stt.provider,
+                "model": self.stt.model,
+                "max_chunk_seconds": self.stt.max_chunk_seconds,
+                "max_chunk_mb": self.stt.max_chunk_mb,
+            },
+            "audio": {
+                "sample_rate": self.audio.sample_rate,
+                "channels": self.audio.channels,
+            },
+            "shortcuts": {
+                "toggle_recording": self.shortcuts.toggle_recording,
+                "copy_transcript": self.shortcuts.copy_transcript,
+            },
+            "cleanup_audio_after_transcription": self.cleanup_audio_after_transcription,
+        }
+
+        # Only include optional fields if set
+        if self.stt.base_url:
+            data["stt"]["base_url"] = self.stt.base_url
+        if self.stt.api_key:
+            data["stt"]["api_key"] = self.stt.api_key
+        if self.audio.temp_dir:
+            data["audio"]["temp_dir"] = self.audio.temp_dir
+
+        return data
 
     def get_temp_dir(self) -> Path:
         """Get the temporary directory for audio files."""
@@ -127,3 +179,12 @@ class AppConfig:
 
         temp_path.mkdir(parents=True, exist_ok=True)
         return temp_path
+
+
+def save_config(config: AppConfig) -> None:
+    """Save configuration to the primary config file."""
+    config_path = AppConfig.get_config_path()
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(config_path, "w") as f:
+        toml.dump(config.to_dict(), f)

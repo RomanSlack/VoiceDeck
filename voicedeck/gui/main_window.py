@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from PySide6.QtCore import Qt, QThread, Signal, Slot
-from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtGui import QShortcut, QKeySequence, QIcon
 from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -20,8 +20,11 @@ from PySide6.QtWidgets import (
 
 from ..audio import AudioRecorder, AudioDevice, RecorderError
 from ..stt import Transcriber, TranscriberError
+from ..stt.openai_client import create_transcriber
 from ..config import AppConfig
+from ..keyring_storage import get_api_key
 from .styles import DARK_STYLESHEET
+from .settings_dialog import SettingsDialog
 
 
 class TranscriptionWorker(QThread):
@@ -62,17 +65,19 @@ class MainWindow(QMainWindow):
         self._current_audio_path: Optional[Path] = None
         self._transcription_worker: Optional[TranscriptionWorker] = None
         self._devices: list[AudioDevice] = []
+        self._shortcuts: list[QShortcut] = []
 
         self._setup_ui()
         self._setup_shortcuts()
         self._refresh_devices()
         self._update_ui_state()
+        self._check_api_key_on_start()
 
     def _setup_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle("VoiceDeck")
-        self.setMinimumSize(500, 450)
-        self.resize(550, 500)
+        self.setMinimumSize(500, 480)
+        self.resize(550, 530)
         self.setStyleSheet(DARK_STYLESHEET)
 
         # Central widget and layout
@@ -81,6 +86,17 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(central)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(16)
+
+        # Top bar with settings button
+        top_bar = QHBoxLayout()
+        top_bar.addStretch()
+
+        self.settings_btn = QPushButton("Settings")
+        self.settings_btn.setObjectName("settingsButton")
+        self.settings_btn.clicked.connect(self._open_settings)
+        top_bar.addWidget(self.settings_btn)
+
+        layout.addLayout(top_bar)
 
         # Microphone selector
         mic_layout = QHBoxLayout()
@@ -136,15 +152,79 @@ class MainWindow(QMainWindow):
         layout.addLayout(btn_layout)
 
     def _setup_shortcuts(self):
-        """Set up keyboard shortcuts."""
-        # Ctrl+Space to toggle recording
-        toggle_shortcut = QShortcut(QKeySequence("Ctrl+Space"), self)
-        toggle_shortcut.activated.connect(self._toggle_recording)
+        """Set up keyboard shortcuts from config."""
+        # Clear existing shortcuts
+        for shortcut in self._shortcuts:
+            shortcut.setEnabled(False)
+            shortcut.deleteLater()
+        self._shortcuts.clear()
 
-        # Ctrl+C when transcript is focused copies all (handled by QTextEdit)
-        # Ctrl+Shift+C to copy transcript from anywhere
-        copy_shortcut = QShortcut(QKeySequence("Ctrl+Shift+C"), self)
+        # Toggle recording shortcut
+        toggle_shortcut = QShortcut(
+            QKeySequence(self.config.shortcuts.toggle_recording), self
+        )
+        toggle_shortcut.activated.connect(self._toggle_recording)
+        self._shortcuts.append(toggle_shortcut)
+
+        # Copy transcript shortcut
+        copy_shortcut = QShortcut(
+            QKeySequence(self.config.shortcuts.copy_transcript), self
+        )
         copy_shortcut.activated.connect(self._copy_transcript)
+        self._shortcuts.append(copy_shortcut)
+
+    def _check_api_key_on_start(self):
+        """Check if API key is configured on startup."""
+        # Check keyring first, then config, then env
+        api_key = get_api_key() or self.config.stt.api_key
+        if not api_key:
+            # Show a friendly prompt to configure
+            QMessageBox.information(
+                self,
+                "Welcome to VoiceDeck",
+                "To get started, please configure your OpenAI API key.\n\n"
+                "Click Settings to enter your API key.",
+            )
+
+    def _open_settings(self):
+        """Open the settings dialog."""
+        dialog = SettingsDialog(self.config, self)
+        dialog.settings_changed.connect(self._on_settings_changed)
+        dialog.exec()
+
+    @Slot()
+    def _on_settings_changed(self):
+        """Handle settings changes."""
+        # Reload config
+        self.config = AppConfig.load()
+
+        # Update API key from keyring
+        api_key = get_api_key()
+        if api_key:
+            self.config.stt.api_key = api_key
+
+        # Recreate transcriber with new settings
+        try:
+            self.transcriber = create_transcriber(self.config.stt)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Configuration Error",
+                f"Failed to apply settings: {e}",
+            )
+            return
+
+        # Recreate recorder with new audio settings
+        self.recorder = AudioRecorder(
+            sample_rate=self.config.audio.sample_rate,
+            channels=self.config.audio.channels,
+            temp_dir=self.config.get_temp_dir(),
+        )
+
+        # Update shortcuts
+        self._setup_shortcuts()
+
+        self._set_status("Settings saved")
 
     def _refresh_devices(self):
         """Refresh the list of available audio devices."""
@@ -226,6 +306,9 @@ class MainWindow(QMainWindow):
         self.copy_btn.setEnabled(has_transcript)
         self.clear_btn.setEnabled(has_transcript or is_recording or is_transcribing)
 
+        # Disable settings during recording/transcription
+        self.settings_btn.setEnabled(not is_recording and not is_transcribing)
+
     @Slot()
     def _toggle_recording(self):
         """Toggle recording on/off."""
@@ -241,15 +324,25 @@ class MainWindow(QMainWindow):
             self._set_status("No microphone selected", error=True)
             return
 
-        # Check if transcriber is configured
-        if not self.transcriber.is_configured():
-            error_msg = self.transcriber.get_configuration_error()
+        # Check if transcriber is configured (check keyring too)
+        api_key = get_api_key() or self.config.stt.api_key
+        if not api_key:
             QMessageBox.warning(
                 self,
-                "Configuration Required",
-                error_msg or "STT backend is not configured.",
+                "API Key Required",
+                "Please configure your OpenAI API key in Settings.",
             )
+            self._open_settings()
             return
+
+        # Update transcriber with keyring API key if needed
+        if api_key and not self.transcriber.is_configured():
+            self.config.stt.api_key = api_key
+            try:
+                self.transcriber = create_transcriber(self.config.stt)
+            except Exception as e:
+                self._set_status(str(e), error=True)
+                return
 
         try:
             self._current_audio_path = self.recorder.start(device)

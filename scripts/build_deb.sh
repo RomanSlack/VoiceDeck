@@ -66,7 +66,7 @@ Section: sound
 Priority: optional
 Architecture: $ARCH
 Installed-Size: $INSTALLED_SIZE
-Depends: libasound2, libportaudio2
+Depends: libasound2t64 | libasound2, libportaudio2, gnome-keyring | libsecret-1-0
 Maintainer: $MAINTAINER
 Description: $DESCRIPTION
  VoiceDeck is a desktop application for recording voice and
