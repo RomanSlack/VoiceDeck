@@ -29,7 +29,7 @@ A desktop voice recorder with speech-to-text transcription for Ubuntu. Record fr
 
 ### Step 1: Download and Install
 
-Download the `.deb` file from the [Releases](https://github.com/yourusername/voicedeck/releases) page, then install:
+Download the `.deb` file from the [Releases](https://github.com/RomanSlack/VoiceDeck/releases) page, then install:
 
 ```bash
 sudo apt install ./voicedeck_1.0.0_amd64.deb
@@ -94,8 +94,8 @@ For developers who want to build from source:
 sudo apt install python3 python3-pip python3-venv libportaudio2
 
 # Clone and setup
-git clone https://github.com/yourusername/voicedeck.git
-cd voicedeck
+git clone https://github.com/RomanSlack/VoiceDeck.git
+cd VoiceDeck
 python3 -m venv venv
 source venv/bin/activate
 pip install -e .
