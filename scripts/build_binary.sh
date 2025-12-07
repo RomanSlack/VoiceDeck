@@ -47,6 +47,10 @@ pyinstaller \
     --hidden-import="voicedeck.gui.main_window" \
     --hidden-import="voicedeck.gui.settings_dialog" \
     --hidden-import="voicedeck.gui.styles" \
+    --hidden-import="voicedeck.gui.widgets" \
+    --hidden-import="voicedeck.gui.widgets.record_button" \
+    --hidden-import="voicedeck.gui.widgets.level_meter" \
+    --hidden-import="voicedeck.gui.widgets.led_indicator" \
     --hidden-import="voicedeck.audio" \
     --hidden-import="voicedeck.audio.recorder" \
     --hidden-import="voicedeck.stt" \

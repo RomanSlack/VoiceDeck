@@ -51,6 +51,7 @@ class AudioRecorder:
         self._is_recording = False
         self._lock = threading.Lock()
         self._error_callback: Optional[Callable[[str], None]] = None
+        self._current_level: float = 0.0  # RMS level for meter display
 
     @staticmethod
     def list_devices() -> list[AudioDevice]:
@@ -118,6 +119,12 @@ class AudioRecorder:
         """Callback function called for each audio block."""
         if status and self._error_callback:
             self._error_callback(f"Audio status: {status}")
+
+        # Calculate RMS level for meter display
+        rms = np.sqrt(np.mean(indata ** 2))
+        # Convert to 0-1 range with some headroom (typical speech is -20 to -6 dB)
+        # Using a gentle curve for better visual response
+        self._current_level = min(1.0, rms * 4.0)
 
         with self._lock:
             if self._wav_file is not None and self._is_recording:
@@ -258,3 +265,7 @@ class AudioRecorder:
     def current_file(self) -> Optional[Path]:
         """Get the path to the current recording file."""
         return self._current_file
+
+    def get_current_level(self) -> float:
+        """Get the current audio input level (0.0 to 1.0) for meter display."""
+        return self._current_level if self._is_recording else 0.0
