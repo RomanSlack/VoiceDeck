@@ -44,18 +44,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Create launcher.py
-        run: |
-          cat > launcher.py << 'EOF'
-          #!/usr/bin/env python3
-          import sys
-          import os
-          sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-          from voicedeck.main import main
-          if __name__ == "__main__":
-              sys.exit(main())
-          EOF
-
       - name: Build binary
         run: python scripts/build.py binary
 
