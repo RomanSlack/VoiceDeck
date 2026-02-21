@@ -11,6 +11,8 @@
 
 A desktop voice recorder with speech-to-text transcription for Linux, macOS, and Windows. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
 
+The simplest and cheapest way to talk to AI coding agents. Speak your thoughts into VoiceDeck, copy the transcript, and paste it straight into your terminal — Claude Code, Cursor, Aider, or whatever you're using. No fancy integrations to set up, no subscriptions beyond your existing API key. Just record, copy, paste.
+
 <p align="center">
   <img src="assets/voice_deck_thumbnail_2.jpg" alt="VoiceDeck Screenshot" width="600">
 </p>
