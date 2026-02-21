@@ -1,6 +1,9 @@
 # VoiceDeck Configuration Example
 # Copy this file to one of these locations:
-#   ~/.config/voicedeck/config.toml
+#   Linux:   ~/.config/VoiceDeck/config.toml
+#   macOS:   ~/Library/Application Support/VoiceDeck/config.toml
+#   Windows: %APPDATA%\VoiceDeck\config.toml
+# Or these universal fallbacks:
 #   ~/.voicedeck.toml
 #   ./config.toml (in working directory)
 

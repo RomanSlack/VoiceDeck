@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 import numpy as np
+import platformdirs
 import sounddevice as sd
 
 
@@ -43,7 +44,7 @@ class AudioRecorder:
     ):
         self.sample_rate = sample_rate
         self.channels = channels
-        self.temp_dir = temp_dir or Path.home() / ".cache" / "voicedeck"
+        self.temp_dir = temp_dir or Path(platformdirs.user_cache_dir("VoiceDeck"))
 
         self._stream: Optional[sd.InputStream] = None
         self._wav_file: Optional[wave.Wave_write] = None

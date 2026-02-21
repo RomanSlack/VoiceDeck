@@ -4,10 +4,12 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-3776ab?logo=python&logoColor=white)
 ![Qt](https://img.shields.io/badge/Qt-PySide6-41cd52?logo=qt&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Whisper-412991?logo=openai&logoColor=white)
-![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-e95420?logo=ubuntu&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-supported-e95420?logo=linux&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-supported-000000?logo=apple&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-supported-0078d4?logo=windows&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A desktop voice recorder with speech-to-text transcription for Ubuntu. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
+A desktop voice recorder with speech-to-text transcription for Linux, macOS, and Windows. Record from any microphone, click stop, and get your transcript. Uses OpenAI's Speech-to-Text API with support for recordings up to 60 minutes.
 
 <p align="center">
   <img src="assets/voice_deck_thumbnail_2.jpg" alt="VoiceDeck Screenshot" width="600">
@@ -17,17 +19,19 @@ A desktop voice recorder with speech-to-text transcription for Ubuntu. Record fr
 
 - **Simple workflow**: Select mic, click record, click stop, get transcript
 - **Long recording support**: Handles 30-60 minute recordings via automatic chunking
+- **Background recording**: Keep recording while using other apps — audio capture runs independently of window focus
 - **Secure API key storage**: Your API key is encrypted in your system's keyring
-- **Built-in settings**: Configure everything in the app - no config files needed
+- **Built-in settings**: Configure everything in the app — no config files needed
 - **Dark themed UI**: Modern, minimal interface
 - **Keyboard shortcuts**: Customizable hotkeys (default: Ctrl+Space to record)
 - **Clipboard integration**: One-click copy of transcripts
+- **Cross-platform**: Same experience on Linux, macOS, and Windows
 
 ---
 
-## Quick Start (Ubuntu)
+## Quick Start
 
-### Step 1: Download and Install
+### Linux
 
 Download the `.deb` file from the [Releases](https://github.com/RomanSlack/VoiceDeck/releases) page, then install:
 
@@ -37,7 +41,22 @@ sudo apt install ./voicedeck_1.0.0_amd64.deb
 
 Or double-click the `.deb` file to open it in Ubuntu Software.
 
-### Step 2: Get an OpenAI API Key
+### macOS
+
+Download `VoiceDeck_1.0.0.dmg` from [Releases](https://github.com/RomanSlack/VoiceDeck/releases), open it, and drag **VoiceDeck** to your **Applications** folder. Launch from Spotlight or the Applications folder.
+
+> On first launch, macOS will ask for microphone permission — click **Allow**.
+> If you see a Gatekeeper warning ("app from unidentified developer"), go to **System Settings > Privacy & Security** and click **Open Anyway**.
+
+### Windows
+
+Download `VoiceDeck_Setup_1.0.0.exe` from [Releases](https://github.com/RomanSlack/VoiceDeck/releases) and run the installer. VoiceDeck will appear in your Start Menu.
+
+> If Windows SmartScreen shows a warning, click **More info** then **Run anyway**.
+
+---
+
+### Get an OpenAI API Key
 
 1. Go to [platform.openai.com](https://platform.openai.com)
 2. Sign up or log in
@@ -45,16 +64,16 @@ Or double-click the `.deb` file to open it in Ubuntu Software.
 4. Click **Create new secret key**
 5. Copy the key (starts with `sk-`)
 
-### Step 3: Launch and Configure
+### Launch and Configure
 
-1. Open **VoiceDeck** from your Applications menu
+1. Open **VoiceDeck** from your app launcher (Applications menu / Spotlight / Start Menu)
 2. Click **Settings** (top right)
 3. Paste your API key in the **API Key** field
 4. Click **Save**
 
 That's it! Your API key is stored securely in your system keyring.
 
-### Step 4: Record and Transcribe
+### Record and Transcribe
 
 1. Select your microphone from the dropdown
 2. Click **Start Recording** (or press `Ctrl+Space`)
@@ -87,7 +106,7 @@ Click the **Settings** button to configure:
 
 ## Building from Source
 
-For developers who want to build from source:
+### Linux
 
 ```bash
 # Install system dependencies
@@ -104,25 +123,67 @@ pip install -e .
 python -m voicedeck.main
 ```
 
-### Building the .deb Package
+### macOS
+
+```bash
+# Install system dependencies
+brew install portaudio
+
+# Clone and setup
+git clone https://github.com/RomanSlack/VoiceDeck.git
+cd VoiceDeck
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+
+# Run
+python -m voicedeck.main
+```
+
+### Windows
+
+```powershell
+# Clone and setup (Python 3.10+ required — download from python.org)
+git clone https://github.com/RomanSlack/VoiceDeck.git
+cd VoiceDeck
+python -m venv venv
+venv\Scripts\activate
+pip install -e .
+
+# Run
+python -m voicedeck.main
+```
+
+### Building Installers
+
+The cross-platform build script handles everything:
 
 ```bash
 pip install pyinstaller
-./scripts/build_binary.sh
-./scripts/build_deb.sh
+
+# Build standalone binary
+python scripts/build.py binary
+
+# Build platform installer (.deb / .exe installer / .dmg)
+python scripts/build.py package
+
+# Or both at once
+python scripts/build.py all
 ```
 
-Output: `dist/voicedeck_1.0.0_amd64.deb`
+The original Linux-only shell scripts (`scripts/build_binary.sh`, `scripts/build_deb.sh`) are still available.
 
 ---
 
 ## Troubleshooting
 
 **App won't start after install?**
-Try running `voicedeck` from a terminal to see error messages.
+Try running `voicedeck` (Linux) or the binary directly from a terminal to see error messages.
 
 **No microphones listed?**
-Make sure your microphone is connected and PulseAudio/PipeWire is running.
+- **Linux**: Make sure your microphone is connected and PulseAudio/PipeWire is running.
+- **macOS**: Check **System Settings > Privacy & Security > Microphone** and ensure VoiceDeck is allowed.
+- **Windows**: Check **Settings > Privacy > Microphone** and ensure access is enabled.
 
 **"API Key Required" error?**
 Click Settings and enter your OpenAI API key.
@@ -135,13 +196,26 @@ Click Settings and enter your OpenAI API key.
 **Very long recordings taking forever?**
 Long recordings (30+ minutes) are split into chunks and transcribed sequentially. This can take a few minutes.
 
+**macOS Gatekeeper blocks the app?**
+Go to **System Settings > Privacy & Security**, find the VoiceDeck entry, and click **Open Anyway**.
+
+**Windows SmartScreen warning?**
+Click **More info** then **Run anyway**. This happens because the binary is not code-signed.
+
 ---
 
 ## Uninstall
 
+**Linux:**
 ```bash
 sudo apt remove voicedeck
 ```
+
+**macOS:**
+Drag VoiceDeck from your Applications folder to the Trash.
+
+**Windows:**
+Open **Settings > Apps**, find VoiceDeck, and click **Uninstall**. Or use the uninstaller from the Start Menu.
 
 ---
 

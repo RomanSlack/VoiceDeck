@@ -1,0 +1,101 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: voicedeck_1.0.0_amd64.deb
+          - os: windows-latest
+            artifact: VoiceDeck_Setup_1.0.0.exe
+          - os: macos-latest
+            artifact: VoiceDeck_1.0.0.dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libportaudio2 libasound2-dev
+
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install portaudio
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Create launcher.py
+        run: |
+          cat > launcher.py << 'EOF'
+          #!/usr/bin/env python3
+          import sys
+          import os
+          sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+          from voicedeck.main import main
+          if __name__ == "__main__":
+              sys.exit(main())
+          EOF
+
+      - name: Build binary
+        run: python scripts/build.py binary
+
+      - name: Build package (Linux)
+        if: runner.os == 'Linux'
+        run: python scripts/build.py package
+
+      - name: Install Inno Setup (Windows)
+        if: runner.os == 'Windows'
+        run: choco install innosetup -y
+
+      - name: Build package (Windows)
+        if: runner.os == 'Windows'
+        run: python scripts/build.py package
+
+      - name: Build package (macOS)
+        if: runner.os == 'macOS'
+        run: python scripts/build.py package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

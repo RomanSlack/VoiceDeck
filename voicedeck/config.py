@@ -1,10 +1,12 @@
 """Configuration management for VoiceDeck."""
 
 import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+import platformdirs
 import toml
 
 
@@ -45,15 +47,15 @@ class AppConfig:
     @classmethod
     def get_config_path(cls) -> Path:
         """Return the primary config file path."""
-        xdg_config = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))
-        return Path(xdg_config) / "voicedeck" / "config.toml"
+        config_dir = platformdirs.user_config_dir("VoiceDeck")
+        return Path(config_dir) / "config.toml"
 
     @classmethod
     def get_config_paths(cls) -> list[Path]:
         """Return list of config file paths to check, in priority order."""
         paths = []
 
-        # XDG config directory (primary)
+        # Platform config directory (primary)
         paths.append(cls.get_config_path())
 
         # Home directory
@@ -61,6 +63,15 @@ class AppConfig:
 
         # Current working directory (for development)
         paths.append(Path.cwd() / "config.toml")
+
+        # Legacy Linux XDG path for existing users
+        if sys.platform == "linux":
+            xdg_config = os.environ.get(
+                "XDG_CONFIG_HOME", os.path.expanduser("~/.config")
+            )
+            legacy_path = Path(xdg_config) / "voicedeck" / "config.toml"
+            if legacy_path not in paths:
+                paths.append(legacy_path)
 
         return paths
 
@@ -172,10 +183,7 @@ class AppConfig:
         if self.audio.temp_dir:
             temp_path = Path(self.audio.temp_dir)
         else:
-            xdg_cache = os.environ.get(
-                "XDG_CACHE_HOME", os.path.expanduser("~/.cache")
-            )
-            temp_path = Path(xdg_cache) / "voicedeck"
+            temp_path = Path(platformdirs.user_cache_dir("VoiceDeck"))
 
         temp_path.mkdir(parents=True, exist_ok=True)
         return temp_path
