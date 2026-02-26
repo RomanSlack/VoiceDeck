@@ -26,6 +26,7 @@ from ..config import AppConfig
 from ..keyring_storage import get_api_key
 from .styles import DARK_STYLESHEET
 from .settings_dialog import SettingsDialog
+from .hotmic_panel import HotMicPanel
 from .widgets import RecordButton, LevelMeter, LEDIndicator
 
 
@@ -83,8 +84,8 @@ class MainWindow(QMainWindow):
     def _setup_ui(self):
         """Initialize the user interface."""
         self.setWindowTitle("VoiceDeck")
-        self.setMinimumSize(600, 650)
-        self.resize(700, 725)
+        self.setMinimumSize(600, 850)
+        self.resize(700, 925)
         self.setStyleSheet(DARK_STYLESHEET)
 
         # Central widget and layout
@@ -199,6 +200,11 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(btn_layout)
 
+        # Hot mic panel
+        self.hotmic_panel = HotMicPanel(self.config, self.transcriber, self)
+        self.hotmic_panel.active_changed.connect(self._on_hotmic_changed)
+        layout.addWidget(self.hotmic_panel)
+
     def _setup_shortcuts(self):
         """Set up keyboard shortcuts from config."""
         # Clear existing shortcuts
@@ -220,6 +226,13 @@ class MainWindow(QMainWindow):
         )
         copy_shortcut.activated.connect(self._copy_transcript)
         self._shortcuts.append(copy_shortcut)
+
+        # Toggle hot mic shortcut
+        hotmic_shortcut = QShortcut(
+            QKeySequence(self.config.shortcuts.toggle_hotmic), self
+        )
+        hotmic_shortcut.activated.connect(self._toggle_hotmic)
+        self._shortcuts.append(hotmic_shortcut)
 
     def _check_api_key_on_start(self):
         """Check if API key is configured on startup."""
@@ -272,7 +285,25 @@ class MainWindow(QMainWindow):
         # Update shortcuts
         self._setup_shortcuts()
 
+        # Update hot mic panel with new config/transcriber
+        self.hotmic_panel.update_config(self.config, self.transcriber)
+
         self._set_status("Settings saved", "green")
+
+    @Slot()
+    def _toggle_hotmic(self):
+        """Toggle hot mic mode."""
+        self.hotmic_panel.toggle()
+
+    @Slot(bool)
+    def _on_hotmic_changed(self, active: bool):
+        """Handle hot mic state change — enforce mutual exclusion."""
+        if active:
+            # Disable main record button while hot mic is active
+            self.record_btn.setEnabled(False)
+        else:
+            # Re-enable if devices are available
+            self.record_btn.setEnabled(bool(self._devices))
 
     def _refresh_devices(self):
         """Refresh the list of available audio devices."""
@@ -396,6 +427,10 @@ class MainWindow(QMainWindow):
 
     def _start_recording(self) -> bool:
         """Start a new recording session. Returns True on success."""
+        # Stop hot mic if active (mutual exclusion)
+        if self.hotmic_panel.is_active:
+            self.hotmic_panel.stop()
+
         device = self._get_selected_device()
         if device is None:
             self._set_status("No microphone selected", "red")
@@ -518,6 +553,9 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Handle window close event."""
+        # Stop hot mic if active
+        self.hotmic_panel.stop()
+
         # Stop level timer
         self._level_timer.stop()
 

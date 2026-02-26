@@ -58,6 +58,9 @@ class SettingsDialog(QDialog):
         # Shortcuts tab
         self._create_shortcuts_tab()
 
+        # Hot Mic tab
+        self._create_hotmic_tab()
+
         # Buttons
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
@@ -210,6 +213,58 @@ class SettingsDialog(QDialog):
 
         self.tabs.addTab(tab, "Shortcuts")
 
+    def _create_hotmic_tab(self):
+        """Create the Hot Mic settings tab."""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setSpacing(12)
+
+        hotmic_group = QGroupBox("Hot Mic Settings")
+        hotmic_layout = QFormLayout(hotmic_group)
+
+        # Stop word
+        self.stop_word_edit = QLineEdit()
+        self.stop_word_edit.setPlaceholderText("moscow")
+        hotmic_layout.addRow("Stop word:", self.stop_word_edit)
+
+        stop_word_hint = QLabel(
+            "Say this word at the end of your utterance to send the accumulated text."
+        )
+        stop_word_hint.setStyleSheet("color: #808080; font-size: 12px;")
+        stop_word_hint.setWordWrap(True)
+        hotmic_layout.addRow("", stop_word_hint)
+
+        # Submit word
+        self.submit_word_edit = QLineEdit()
+        self.submit_word_edit.setPlaceholderText("delta")
+        hotmic_layout.addRow("Submit word:", self.submit_word_edit)
+
+        submit_word_hint = QLabel(
+            "Say this after the stop word to also press Enter (submit the command)."
+        )
+        submit_word_hint.setStyleSheet("color: #808080; font-size: 12px;")
+        submit_word_hint.setWordWrap(True)
+        hotmic_layout.addRow("", submit_word_hint)
+
+        # Buffer timeout
+        self.buffer_timeout_spin = QSpinBox()
+        self.buffer_timeout_spin.setRange(5, 600)
+        self.buffer_timeout_spin.setSuffix(" seconds")
+        self.buffer_timeout_spin.setSingleStep(5)
+        hotmic_layout.addRow("Buffer timeout:", self.buffer_timeout_spin)
+
+        timeout_hint = QLabel(
+            "Discard accumulated text if no new speech is detected within this time."
+        )
+        timeout_hint.setStyleSheet("color: #808080; font-size: 12px;")
+        timeout_hint.setWordWrap(True)
+        hotmic_layout.addRow("", timeout_hint)
+
+        layout.addWidget(hotmic_group)
+        layout.addStretch()
+
+        self.tabs.addTab(tab, "Hot Mic")
+
     def _toggle_key_visibility(self, show: bool):
         """Toggle API key visibility."""
         if show:
@@ -258,6 +313,11 @@ class SettingsDialog(QDialog):
             QKeySequence(self.config.shortcuts.copy_transcript)
         )
 
+        # Hot Mic
+        self.stop_word_edit.setText(self.config.hotmic.stop_word)
+        self.submit_word_edit.setText(self.config.hotmic.submit_word)
+        self.buffer_timeout_spin.setValue(int(self.config.hotmic.accumulation_timeout))
+
     def _save_settings(self):
         """Save settings and close dialog."""
         # Validate API key
@@ -298,6 +358,15 @@ class SettingsDialog(QDialog):
         # Save shortcuts
         self.config.shortcuts.toggle_recording = self.record_shortcut_edit.keySequence().toString()
         self.config.shortcuts.copy_transcript = self.copy_shortcut_edit.keySequence().toString()
+
+        # Save hot mic settings
+        stop_word = self.stop_word_edit.text().strip()
+        if stop_word:
+            self.config.hotmic.stop_word = stop_word
+        submit_word = self.submit_word_edit.text().strip()
+        if submit_word:
+            self.config.hotmic.submit_word = submit_word
+        self.config.hotmic.accumulation_timeout = float(self.buffer_timeout_spin.value())
 
         # Write config to file
         save_config(self.config)

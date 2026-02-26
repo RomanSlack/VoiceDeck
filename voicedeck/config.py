@@ -30,10 +30,23 @@ class AudioConfig:
 
 
 @dataclass
+class HotMicConfig:
+    """Hot mic mode configuration."""
+    threshold: float = 0.02
+    silence_duration: float = 1.5
+    min_segment: float = 0.5
+    match_confidence: float = 0.8
+    stop_word: str = "moscow"
+    submit_word: str = "delta"
+    accumulation_timeout: float = 300.0
+
+
+@dataclass
 class ShortcutsConfig:
     """Keyboard shortcuts configuration."""
     toggle_recording: str = "Ctrl+Space"
     copy_transcript: str = "Ctrl+Shift+C"
+    toggle_hotmic: str = "Ctrl+Shift+H"
 
 
 @dataclass
@@ -42,6 +55,7 @@ class AppConfig:
     stt: STTConfig = field(default_factory=STTConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)
     shortcuts: ShortcutsConfig = field(default_factory=ShortcutsConfig)
+    hotmic: HotMicConfig = field(default_factory=HotMicConfig)
     cleanup_audio_after_transcription: bool = True
 
     @classmethod
@@ -140,6 +154,31 @@ class AppConfig:
             config.shortcuts.copy_transcript = shortcuts_data.get(
                 "copy_transcript", config.shortcuts.copy_transcript
             )
+            config.shortcuts.toggle_hotmic = shortcuts_data.get(
+                "toggle_hotmic", config.shortcuts.toggle_hotmic
+            )
+
+        if "hotmic" in data:
+            hm = data["hotmic"]
+            config.hotmic.threshold = hm.get("threshold", config.hotmic.threshold)
+            config.hotmic.silence_duration = hm.get(
+                "silence_duration", config.hotmic.silence_duration
+            )
+            config.hotmic.min_segment = hm.get(
+                "min_segment", config.hotmic.min_segment
+            )
+            config.hotmic.match_confidence = hm.get(
+                "match_confidence", config.hotmic.match_confidence
+            )
+            config.hotmic.stop_word = hm.get(
+                "stop_word", config.hotmic.stop_word
+            )
+            config.hotmic.submit_word = hm.get(
+                "submit_word", config.hotmic.submit_word
+            )
+            config.hotmic.accumulation_timeout = hm.get(
+                "accumulation_timeout", config.hotmic.accumulation_timeout
+            )
 
         config.cleanup_audio_after_transcription = data.get(
             "cleanup_audio_after_transcription",
@@ -164,6 +203,16 @@ class AppConfig:
             "shortcuts": {
                 "toggle_recording": self.shortcuts.toggle_recording,
                 "copy_transcript": self.shortcuts.copy_transcript,
+                "toggle_hotmic": self.shortcuts.toggle_hotmic,
+            },
+            "hotmic": {
+                "threshold": self.hotmic.threshold,
+                "silence_duration": self.hotmic.silence_duration,
+                "min_segment": self.hotmic.min_segment,
+                "match_confidence": self.hotmic.match_confidence,
+                "stop_word": self.hotmic.stop_word,
+                "submit_word": self.hotmic.submit_word,
+                "accumulation_timeout": self.hotmic.accumulation_timeout,
             },
             "cleanup_audio_after_transcription": self.cleanup_audio_after_transcription,
         }
